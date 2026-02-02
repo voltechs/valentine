@@ -192,9 +192,8 @@
       background: linear-gradient(135deg, rgba(255,79,216,.95), rgba(255,59,107,.95));
       color: #140013;
       box-shadow: 0 12px 28px rgba(255,79,216,.25), 0 6px 18px rgba(255,59,107,.18);
-      transform: translateZ(0) scale(1);
       position: absolute;
-      left: 18%;
+      left: 30%;
       top: 50%;
       transform: translate(-50%, -50%) scale(var(--yesScale, 1));
       transform-origin: center;
@@ -428,11 +427,11 @@
     }
 
     function growYes() {
-      // Slower growth, capped at 3x size
-      const scale = Math.min(3, 1 + dodges * 0.02);
+      // Fast growth at first, then tapers off (square root curve)
+      const scale = Math.min(5, 1 + Math.sqrt(dodges) * 0.35);
       document.documentElement.style.setProperty('--yesScale', String(scale));
-      // move toward center more slowly, cap at 50%
-      const leftPos = Math.min(50, 30 + dodges * 0.20);
+      // move toward center, also tapering
+      const leftPos = Math.min(50, 30 + Math.sqrt(dodges) * 2.5);
       yesBtn.style.left = leftPos + '%';
     }
 
@@ -594,7 +593,7 @@
       yesBtn.style.position = 'absolute';
       yesBtn.style.left = '30%';
       yesBtn.style.top  = '50%';
-      yesBtn.style.transform = 'translate(-50%,-50%)';
+      // Don't set transform inline - let CSS handle it with scale variable
 
       // Position No button the same way initially
       noBtn.style.position = 'absolute';
