@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1020" />
+  <meta name="theme-color" content="#1a1f38" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="apple-touch-icon" href="favicon.png" />
@@ -23,6 +23,9 @@
 
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--text); user-select: none; -webkit-user-select: none; }
+
+    /* Ensure Safari can sample the theme color */
+    html { background-color: #1a1f38; }
 
     /* Background */
     body{
