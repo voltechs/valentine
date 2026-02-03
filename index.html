@@ -296,7 +296,7 @@
             <!-- Swap this for an <img> if you want:
                  <img src="your-image.jpg" style="width:100%;height:100%;object-fit:cover" />
             -->
-            <div class="emoji" id="emoji">🥺</div>
+            <div class="emoji" id="emoji">😊</div>
           </div>
           <div class="caption" id="caption">pls say yes</div>
         </div>
@@ -367,27 +367,33 @@
     let dodges = 0;
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
-    const noPhrases = [
-      "Are you sure?",
-      "Really?",
-      "Think again",
-      "C'mon 😌",
-      "Seriously?",
-      "Don't do it",
-      "Stop that",
-      "Ok but... why",
-      "lol no",
-      "Still no?",
-      "Wow okay",
-      "This is silly",
-      "Just say yes",
-      "Please?",
-      "Pretty please?",
-      "Come onnn",
-      "You're killing me",
-      "Why tho",
-      "Stopppp",
-      "Last chance... maybe",
+
+    // Emoji and caption progression based on dodge count
+    const emojiStages = [
+      { minDodges: 0, emoji: "😊", caption: "pls say yes" },
+      { minDodges: 1, emoji: "🤔", caption: "wait... really?" },
+      { minDodges: 3, emoji: "😳", caption: "this is awkward" },
+      { minDodges: 5, emoji: "🥺", caption: "pls reconsider" },
+      { minDodges: 8, emoji: "🥺", caption: "do I smell or something?" },
+      { minDodges: 11, emoji: "😰", caption: "what did I do to deserve this?" },
+      { minDodges: 14, emoji: "🥹", caption: "confused why no was even an option" },
+      { minDodges: 17, emoji: "🥹", caption: "who hurt you?" },
+      { minDodges: 20, emoji: "😢", caption: "starting to hurt a little" },
+      { minDodges: 23, emoji: "😢", caption: "is it my hair?" },
+      { minDodges: 26, emoji: "😭", caption: "this is getting ridiculous" },
+      { minDodges: 29, emoji: "😭", caption: "I showered today I swear" },
+      { minDodges: 32, emoji: "😭", caption: "why are you like this" },
+      { minDodges: 35, emoji: "💔", caption: "my heart can't take this" },
+      { minDodges: 38, emoji: "🫠", caption: "I'm literally melting" },
+      { minDodges: 41, emoji: "🫠", caption: "was it something I said?" },
+      { minDodges: 44, emoji: "💀", caption: "you're killing me" },
+      { minDodges: 47, emoji: "💀", caption: "call 911" },
+      { minDodges: 50, emoji: "👻", caption: "I'm dead now, thanks" },
+      { minDodges: 55, emoji: "👻", caption: "haunting you forever" },
+      { minDodges: 60, emoji: "🪦", caption: "RIP to my self-esteem" },
+      { minDodges: 70, emoji: "🤡", caption: "I'm the whole circus at this point" },
+      { minDodges: 80, emoji: "🗿", caption: "emotionally unavailable now" },
+      { minDodges: 90, emoji: "💩", caption: "this is just cruel" },
     ];
 
     function clamp(n, lo, hi){ return Math.max(lo, Math.min(hi, n)); }
@@ -470,28 +476,35 @@
     }
 
     function updateText() {
-      // Change phrase every 5 dodges
-      const phraseIndex = Math.floor(dodges / 5) % noPhrases.length;
-      const phrase = noPhrases[phraseIndex];
-      noBtn.textContent = phrase;
+      // Keep No button as "No" (or could cycle through phrases if you want)
+      // noBtn.textContent = "No";
 
-      if (dodges >= 5) caption.textContent = "confused why no was even an option";
-      if (dodges >= 15) emoji.textContent = "🥹";
-      if (dodges >= 25) emoji.textContent = "😍";
-      if (dodges >= 40) caption.textContent = "this is getting ridiculous";
-      if (dodges >= 60) emoji.textContent = "😭";
-      if (dodges >= 70) caption.textContent = "just give up already";
-      if (dodges >= 85) emoji.textContent = "🫠";
+      // Find the current emoji stage based on dodge count
+      let currentStage = emojiStages[0];
+      for (let i = emojiStages.length - 1; i >= 0; i--) {
+        if (dodges >= emojiStages[i].minDodges) {
+          currentStage = emojiStages[i];
+          break;
+        }
+      }
+
+      emoji.textContent = currentStage.emoji;
+      caption.textContent = currentStage.caption;
     }
 
     function dodgeNo(mouseX, mouseY) {
       dodges++;
 
+      // If zombie mode is active, increase speed slightly with each dodge
+      if (yesZombieActive) {
+        zombieSpeedMultiplier = Math.min(3, zombieSpeedMultiplier + 0.08);
+      }
+
       growYes();
       updateText();
       placeNoRandom(mouseX, mouseY);
 
-      // Update text at milestones
+      // Optional: Update header text at high dodge counts
       if (dodges >= 90) {
         yesBtn.textContent = "YES!!!";
         topline.textContent = "Ok, ok. We both know the answer.";
@@ -630,10 +643,16 @@
     let yesZombieActive = false;
     let yesX = 0;
     let yesY = 0;
+    let zombieSpeedMultiplier = 0.3; // Start super slow, increases with each dodge
 
     function zombieYes() {
       if (dodges >= 20 && !yesZombieActive) {
         yesZombieActive = true;
+
+        // Get current button position before moving to overlay
+        const rect = yesBtn.getBoundingClientRect();
+        yesX = rect.left + rect.width / 2;
+        yesY = rect.top + rect.height / 2;
 
         // Move Yes button to overlay so positioning is truly viewport-based
         yesOverlay.appendChild(yesBtn);
@@ -642,10 +661,6 @@
         yesBtn.style.transform = 'none';
         yesBtn.style.margin = '0';
         yesBtn.style.pointerEvents = 'auto';
-
-        // Start tracking from mouse
-        yesX = mouseX;
-        yesY = mouseY;
       }
 
       if (yesZombieActive) {
@@ -657,17 +672,17 @@
         if (dist > 1) {
           if (dist > 200) {
             // Far: accelerate smoothly (lerp = slow start)
-            const lerpSpeed = 0.02;
+            const lerpSpeed = 0.02 * zombieSpeedMultiplier;
             yesX += dx * lerpSpeed;
             yesY += dy * lerpSpeed;
           } else if (dist > 50) {
             // Medium distance: constant max speed
-            const maxSpeed = 3;
+            const maxSpeed = 3 * zombieSpeedMultiplier;
             yesX += (dx / dist) * maxSpeed;
             yesY += (dy / dist) * maxSpeed;
           } else {
             // Close: decelerate smoothly (higher lerp = smooth slow down)
-            const lerpSpeed = 0.08;
+            const lerpSpeed = 0.08 * zombieSpeedMultiplier;
             yesX += dx * lerpSpeed;
             yesY += dy * lerpSpeed;
           }
