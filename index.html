@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b1020" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Valentine?</title>
   <style>
     :root{
@@ -195,8 +198,8 @@
       position: absolute;
       left: 30%;
       top: 50%;
-      transform: translate(-50%, -50%) scale(var(--yesScale, 1));
-      transform-origin: center;
+      transform: translate(-50%, -50%);
+      font-size: 16px;
     }
     .yes:hover{ filter: brightness(1.06); }
 
@@ -349,7 +352,17 @@
     const emoji = document.getElementById('emoji');
     const caption = document.getElementById('caption');
 
+    // Full-screen overlay so "fixed" never gets trapped by backdrop-filter containers
+    const yesOverlay = document.createElement('div');
+    yesOverlay.style.position = 'fixed';
+    yesOverlay.style.inset = '0';
+    yesOverlay.style.zIndex = '20000';
+    yesOverlay.style.pointerEvents = 'none';
+    document.body.appendChild(yesOverlay);
+
     let dodges = 0;
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
     const noPhrases = [
       "Are you sure?",
       "Really?",
@@ -385,7 +398,7 @@
         noButtonEscaped = true;
       }
 
-      const minDistance = 250;
+      const minDistance = 300;
 
       // Use very conservative bounds that work even if viewport shrinks (e.g. DevTools opens)
       const rect = noBtn.getBoundingClientRect();
@@ -405,18 +418,22 @@
       let x, y, attempts = 0;
 
       // Keep trying random positions until we find one far from the mouse
+      // Calculate distance from mouse to CENTER of button
       do {
         x = marginX + Math.floor(Math.random() * (maxX - marginX));
         y = marginY + Math.floor(Math.random() * (maxY - marginY));
 
+        // Distance from mouse to button center
+        const btnCenterX = x + btnW / 2;
+        const btnCenterY = y + btnH / 2;
         const dist = Math.sqrt(
-          Math.pow(x - mouseX, 2) +
-          Math.pow(y - mouseY, 2)
+          Math.pow(btnCenterX - mouseX, 2) +
+          Math.pow(btnCenterY - mouseY, 2)
         );
 
         if (dist >= minDistance) break;
         attempts++;
-      } while (attempts < 20);
+      } while (attempts < 30);
 
       console.log('Dodge:', {x, y, btnW, btnH, maxX, maxY, innerWidth: window.innerWidth, innerHeight: window.innerHeight});
 
@@ -427,12 +444,25 @@
     }
 
     function growYes() {
-      // Fast growth at first, then tapers off (square root curve)
-      const scale = Math.min(5, 1 + Math.sqrt(dodges) * 0.35);
-      document.documentElement.style.setProperty('--yesScale', String(scale));
-      // move toward center, also tapering
-      const leftPos = Math.min(50, 30 + Math.sqrt(dodges) * 2.5);
-      yesBtn.style.left = leftPos + '%';
+      // Faster growth - increased multiplier
+      const growth = Math.sqrt(dodges) * 0.8;
+      const maxGrowth = 4;
+      const actualGrowth = Math.min(maxGrowth, growth);
+
+      // Increase padding and font size for smooth growth
+      const basePadding = 12;
+      const baseFontSize = 16;
+      const padding = basePadding + actualGrowth * 12;
+      const fontSize = baseFontSize + actualGrowth * 8;
+
+      yesBtn.style.padding = `${padding}px ${padding * 1.5}px`;
+      yesBtn.style.fontSize = `${fontSize}px`;
+
+      // move toward center initially, then zombie mode takes over
+      if (dodges < 20) {
+        const leftPos = Math.min(50, 30 + Math.sqrt(dodges) * 2.5);
+        yesBtn.style.left = leftPos + '%';
+      }
     }
 
     function updateText() {
@@ -585,6 +615,70 @@
     }
 
     yesBtn.addEventListener('click', (e) => { e.preventDefault(); celebrate(); });
+
+    // Track mouse position globally
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    });
+
+    // Zombie Yes button - slowly follows the mouse after 20 dodges
+    let yesZombieActive = false;
+    let yesX = 0;
+    let yesY = 0;
+
+    function zombieYes() {
+      if (dodges >= 20 && !yesZombieActive) {
+        yesZombieActive = true;
+
+        // Move Yes button to overlay so positioning is truly viewport-based
+        yesOverlay.appendChild(yesBtn);
+
+        yesBtn.style.position = 'absolute';
+        yesBtn.style.transform = 'none';
+        yesBtn.style.margin = '0';
+        yesBtn.style.pointerEvents = 'auto';
+
+        // Start tracking from mouse
+        yesX = mouseX;
+        yesY = mouseY;
+      }
+
+      if (yesZombieActive) {
+        // Move with momentum: accelerate when far, max speed in middle, decelerate when close
+        const dx = mouseX - yesX;
+        const dy = mouseY - yesY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 1) {
+          if (dist > 200) {
+            // Far: accelerate smoothly (lerp = slow start)
+            const lerpSpeed = 0.02;
+            yesX += dx * lerpSpeed;
+            yesY += dy * lerpSpeed;
+          } else if (dist > 50) {
+            // Medium distance: constant max speed
+            const maxSpeed = 3;
+            yesX += (dx / dist) * maxSpeed;
+            yesY += (dy / dist) * maxSpeed;
+          } else {
+            // Close: decelerate smoothly (higher lerp = smooth slow down)
+            const lerpSpeed = 0.08;
+            yesX += dx * lerpSpeed;
+            yesY += dy * lerpSpeed;
+          }
+        }
+
+        // Center button on tracked position
+        const rect = yesBtn.getBoundingClientRect();
+        yesBtn.style.left = Math.round(yesX - rect.width / 2) + 'px';
+        yesBtn.style.top = Math.round(yesY - rect.height / 2) + 'px';
+      }
+
+      requestAnimationFrame(zombieYes);
+    }
+
+    zombieYes();
 
     // Make initial positions
     (function init(){
