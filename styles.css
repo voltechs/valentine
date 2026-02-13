@@ -1,0 +1,284 @@
+:root{
+  --bg1:#0b1020;
+  --bg2:#2a0b2e;
+  --card:#0f162fdd;
+  --text:#f7f2ff;
+  --muted:#c9b7ff;
+  --pink:#ff4fd8;
+  --rose:#ff3b6b;
+  --glow: 0 0 20px rgba(255,79,216,.45), 0 0 40px rgba(255,59,107,.25);
+  --radius: 22px;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--text); user-select: none; -webkit-user-select: none; }
+
+/* Ensure Safari can sample the theme color */
+html { background-color: #1a1f38; }
+
+/* Background */
+body{
+  overflow: hidden;
+  background: radial-gradient(1200px 900px at 20% 10%, #2b1454 0%, transparent 55%),
+              radial-gradient(900px 700px at 80% 30%, #4a1030 0%, transparent 60%),
+              radial-gradient(900px 900px at 40% 90%, #0f244d 0%, transparent 55%),
+              linear-gradient(160deg, var(--bg1), var(--bg2));
+}
+
+/* subtle static glow - removed breathing animation */
+.aurora{
+  position: fixed; inset: -20%;
+  background: radial-gradient(closest-side, rgba(255,79,216,.22), transparent 70%),
+              radial-gradient(closest-side, rgba(120,200,255,.18), transparent 70%),
+              radial-gradient(closest-side, rgba(255,59,107,.20), transparent 70%);
+  filter: blur(30px);
+  pointer-events: none;
+  opacity: .9;
+}
+
+#starfield{
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  opacity: .95;
+}
+
+/* Make sure content stays above */
+.wrap{ position: relative; z-index: 2; }
+.hearts-layer{ position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+.aurora{ z-index: 0; }
+
+
+/* Keep your content above */
+.aurora, .hearts-layer { z-index: 0; }
+.wrap { position: relative; z-index: 1; }
+
+/* Ensure background layers sit behind the card */
+.aurora, .sparkles, .hearts-layer { z-index: 0; }
+.wrap { position: relative; z-index: 1; }
+
+/* Floating hearts layer */
+.hearts-layer{
+  position: fixed; inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.heart{
+  position: absolute;
+  bottom: -40px;
+  font-size: 18px;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px rgba(255,79,216,.45));
+  animation: floatUp linear forwards;
+  will-change: transform, opacity;
+}
+@keyframes floatUp{
+  /* Smooth sine wave pattern for natural floating motion */
+  0%   { transform: translate3d(0, 0, 0) scale(.85) rotate(0deg); opacity: 0; }
+  10%  { opacity: .75; }
+  12.5% { transform: translate3d(calc(var(--wave) * 0.38), calc(-0.125 * var(--dy)), 0) scale(.88) rotate(1deg); }
+  25%  { transform: translate3d(calc(var(--wave) * 0.71), calc(-0.25 * var(--dy)), 0) scale(.92) rotate(2deg); }
+  37.5% { transform: translate3d(calc(var(--wave) * 0.92), calc(-0.375 * var(--dy)), 0) scale(.97) rotate(2.5deg); }
+  50%  { transform: translate3d(calc(var(--wave) * 1.0), calc(-0.5 * var(--dy)), 0) scale(1.02) rotate(3deg); opacity: .85; }
+  62.5% { transform: translate3d(calc(var(--wave) * 0.92), calc(-0.625 * var(--dy)), 0) scale(1.07) rotate(2.5deg); }
+  75%  { transform: translate3d(calc(var(--wave) * 0.71), calc(-0.75 * var(--dy)), 0) scale(1.12) rotate(2deg); }
+  87.5% { transform: translate3d(calc(var(--wave) * 0.38), calc(-0.875 * var(--dy)), 0) scale(1.18) rotate(1deg); }
+  100% { transform: translate3d(0, calc(-1 * var(--dy)), 0) scale(1.25) rotate(0deg); opacity: 0; }
+}
+
+/* Center card */
+.wrap{
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.card{
+  width: min(520px, 92vw);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 70px rgba(0,0,0,.45);
+  backdrop-filter: blur(10px);
+  overflow: visible;
+  position: relative;
+}
+
+.card::before{
+  content:"";
+  position:absolute; inset:-2px;
+  background: radial-gradient(600px 280px at 30% 0%, rgba(255,79,216,.22), transparent 60%),
+              radial-gradient(600px 280px at 70% 100%, rgba(120,200,255,.14), transparent 60%);
+  pointer-events:none;
+}
+
+.content{
+  position: relative;
+  padding: 22px 22px 18px;
+  text-align: center;
+}
+
+h1{
+  margin: 8px 0 6px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  font-size: clamp(28px, 4.5vw, 40px);
+  text-shadow: 0 0 18px rgba(255,79,216,.18);
+}
+
+.subtitle{
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.hero{
+  display: grid;
+  place-items: center;
+  margin: 10px auto 18px;
+  width: 100%;
+}
+
+/* Replace with your own image if you want */
+.heroBox{
+  width: min(260px, 72vw);
+  aspect-ratio: 1/1;
+  border-radius: 18px;
+  background: radial-gradient(circle at 30% 25%, rgba(255,79,216,.18), transparent 55%),
+              radial-gradient(circle at 70% 70%, rgba(120,200,255,.12), transparent 55%),
+              rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--glow);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.emoji{
+  font-size: 84px;
+  transform: translateY(4px);
+  filter: drop-shadow(0 12px 18px rgba(0,0,0,.35));
+}
+
+.caption{
+  margin-top: 10px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: rgba(255,255,255,.92);
+}
+
+/* Buttons zone */
+.btnRow{
+  position: relative;
+  height: 90px;
+  display: grid;
+  place-items: center;
+  margin-top: 10px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.btns{
+  position: relative;
+  width: min(420px, 86vw);
+  height: 70px;
+  display: grid;
+  place-items: center;
+}
+
+button{
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease, opacity .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.yes{
+  background: linear-gradient(135deg, rgba(255,79,216,.95), rgba(255,59,107,.95));
+  color: #140013;
+  box-shadow: 0 12px 28px rgba(255,79,216,.25), 0 6px 18px rgba(255,59,107,.18);
+  position: absolute;
+  left: 30%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+}
+.yes:hover{ filter: brightness(1.06); }
+
+.no{
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 10px 24px rgba(0,0,0,.22);
+  position: absolute;
+  left: 74%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.no:hover{ filter: brightness(1.08); }
+
+/* Success view */
+.success{
+  display: none;
+  margin-top: 14px;
+  padding: 14px 12px 6px;
+}
+.success.show{ display: block; }
+.yay{
+  font-size: clamp(34px, 5vw, 52px);
+  font-weight: 900;
+  margin: 0 0 8px;
+  text-shadow: var(--glow);
+}
+.msg{
+  margin: 0;
+  color: rgba(255,255,255,.88);
+  font-size: 15px;
+}
+
+/* Container for fireworks */
+#fx{
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* CSS-based firework particles */
+.fw-particle{
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  z-index: 9999;
+}
+
+@keyframes fwBurst{
+  0% { transform: translate3d(0, 0, 0) scale(0.5); opacity: 1; }
+  100% { transform: translate3d(var(--fx), var(--fy), 0) scale(1.2); opacity: 0; }
+}
+
+/* small footer hint */
+.hint{
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: rgba(255,255,255,.55);
+}
+.hint code{
+  background: rgba(255,255,255,.08);
+  padding: 2px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.10);
+}
