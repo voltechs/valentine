@@ -286,11 +286,25 @@ function celebrate() {
 
 yesBtn.addEventListener('click', (e) => { e.preventDefault(); celebrate(); });
 
-// ---------- Track Mouse Position ----------
+// ---------- Track Mouse/Touch Position ----------
 document.addEventListener('mousemove', (e) => {
   mouseX = e.clientX;
   mouseY = e.clientY;
 });
+
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length > 0) {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length > 0) {
+    mouseX = e.touches[0].clientX;
+    mouseY = e.touches[0].clientY;
+  }
+}, { passive: true });
 
 // ---------- Zombie Yes Button ----------
 // Slowly follows the mouse after 20 dodges
